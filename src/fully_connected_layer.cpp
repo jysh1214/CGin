@@ -82,11 +82,14 @@ struct matrix<double> FullyConnectedLayer::getWeight(const int which_weight)
 }
 
 void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data, 
-    const vector<int> &annotation, const int epoch, unsigned int mini_batch_size)
+    const vector<int> &annotation, const unsigned int epoch, double learning_rate, unsigned int mini_batch_size)
 {
-    // int first_layer = number_of_neurons_for_each_layer[0]; // input data length
     unsigned int total_batch_size = 0;
-    //batch-size大小的data 進入 直到底
+    unsigned int epoch_count = 0;
+
+    for (; epoch_count < epoch; epoch_count++)
+    {
+
     vector<double*>::const_iterator it = input_data.begin();
     for (; total_batch_size < input_data.size(); total_batch_size += mini_batch_size) // mini_batch_size = 1
     {
@@ -97,15 +100,15 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
         {
             this->forward_matrix->data[0][i] = (*it)[i];
         }
-
         this->forward(0);
         it ++;
-    }
-    
+    } // batch data iterator
 
     //帶入loss function 做梯地下降 調整權重和偏至
 
     //全部迭代完成後 為一epoch
+
+    } // epoch iterator
 }
 
 /*

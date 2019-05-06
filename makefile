@@ -4,7 +4,7 @@ BIN=bin
 SRC=src
 TEST=test
 OBJ=obj
-LIBS=-lgtest -lpthread
+LIBS=-lgtest -lpthread -lgsl -lgslcblas -lm
 
 all: dirs $(BIN)/unit_test
 

@@ -30,7 +30,7 @@ public:
     void addHidenLayer(const FullyConnectedLayer fully_connected_layer);
 
     void GradientDescent(const vector<double*> &input_data, const vector<int> &annotation, 
-                        int epoch, unsigned int mini_batch_size=1);  
+        const unsigned int epoch, double learning_rate, unsigned int mini_batch_size=1);  
 
     struct matrix<double> getWeight(const int which_weight);
 
@@ -48,17 +48,18 @@ private:
     int * number_of_neurons_for_each_layer;
     ActivationFunction activation_function;
 
-    struct matrix<double> * biases;
-
     /* weight between two layers 
     * weight[0] : layer_1 to layer_2
     * weight[1] : layer_2 to layer_3 ...
     * 
+    * bias  :  0   1   2 ...
     * weight:  0   1   2 ...
     * layer: 0| |1| |2| |3 ...
     */
+    struct matrix<double> * biases;
     struct matrix<double> * weights;
 
+    // to store forward matrix
     struct matrix<double> * forward_matrix;
 };
 

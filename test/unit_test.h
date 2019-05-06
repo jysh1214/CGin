@@ -116,7 +116,7 @@ TEST (Random_TEST, )
 TEST_F (Dice_Recognize_TEST, )
 {
     FullyConnectedLayer f = FullyConnectedLayer(3, 9, 10, 6);
-    f.GradientDescent(input_data, annotation, 10);
+    f.GradientDescent(input_data, annotation, 10, 0.003);
     ASSERT_TRUE(1);
 }
 
