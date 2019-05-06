@@ -35,7 +35,7 @@ dirs:
 	mkdir -p $(SRC) $(TEST) $(BIN) $(OBJ)
 
 clean:
-	rm -rf $(BIN) $(OBJ)
+	rm -rf $(BIN) $(OBJ) .vscode/
 
 stat:
 	wc src/* test/*
