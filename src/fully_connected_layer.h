@@ -29,9 +29,6 @@ public:
     void setActivationFunction(const ActivationFunction activation_function);
     void addHidenLayer(const FullyConnectedLayer fully_connected_layer);
 
-    // void GradientDescent(map<const double*, int, ptr_less<const double>> input_data, 
-    //                         int epoch, int mini_batch_size=1);
-
     void GradientDescent(const vector<double*> &input_data, const vector<int> &annotation, 
                         int epoch, unsigned int mini_batch_size=1);  
 
@@ -42,7 +39,7 @@ public:
     
 private:
     double loss_function();
-    void forward(const double * cell, const int which_layer);
+    void forward(const int which_layer);
 
     vector <FullyConnectedLayer> hidenLayer;
     vector <NeuralNetwork> flow;
@@ -61,6 +58,8 @@ private:
     * layer: 0| |1| |2| |3 ...
     */
     struct matrix<double> * weights;
+
+    struct matrix<double> * forward_matrix;
 };
 
 #endif

@@ -21,14 +21,18 @@ using namespace std;
 */
 FullyConnectedLayer::FullyConnectedLayer(const unsigned int number_of_layers, ...): number_of_layers(0)
 {
-    if (number_of_layers < 2) throw string("number of layers must be greater than 2\n");
+    if (number_of_layers < 2) throw string("number of layers must be greater than 1\n");
     this->number_of_layers += number_of_layers;
     this->number_of_neurons_for_each_layer = (int*) new int[number_of_layers];
 
     va_list number_of_neurons_for_each_layer;
     va_start(number_of_neurons_for_each_layer, number_of_layers);
         for (unsigned int i = 0; i < number_of_layers; i++)
-            this->number_of_neurons_for_each_layer[i] = va_arg(number_of_neurons_for_each_layer, int);
+        {
+            this->number_of_neurons_for_each_layer[i] = 
+                va_arg(number_of_neurons_for_each_layer, int);
+        }
+            
     va_end(number_of_neurons_for_each_layer);
 
     // both the biases and the weight are randomly initialized
@@ -77,15 +81,8 @@ struct matrix<double> FullyConnectedLayer::getWeight(const int which_weight)
     return weights[which_weight];
 }
 
-// void FullyConnectedLayer::GradientDescent(const map<const double*, int, ptr_less<const double>> input_data, 
-//                                             int epoch, int mini_batch_size)
-// {
-//     // cout<<input_data.size()<<endl;
-//     for (auto &item:input_data) cout<<item.first<<": "<<item.second<<endl;
-// }
-
-void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data, const vector<int> &annotation, 
-                                            const int epoch, unsigned int mini_batch_size)
+void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data, 
+    const vector<int> &annotation, const int epoch, unsigned int mini_batch_size)
 {
     // int first_layer = number_of_neurons_for_each_layer[0]; // input data length
     unsigned int total_batch_size = 0;
@@ -93,16 +90,15 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data, con
     vector<double*>::const_iterator it = input_data.begin();
     for (; total_batch_size < input_data.size(); total_batch_size += mini_batch_size) // mini_batch_size = 1
     {
-        // unsigned int data_length = this->number_of_neurons_for_each_layer[0];
-        // matrix<double> cell(1, data_length);
-        // for (unsigned int i = 0; i < data_length; i++) 
-        // {
-        //     cell.data[0][i] = (*it)[i];
-        // }
+        // convert double * to struct matrix *
+        unsigned int first_data_length = this->number_of_neurons_for_each_layer[0];
+        this->forward_matrix = new matrix<double>(1, first_data_length);
+        for (unsigned int i = 0; i < first_data_length; i++) 
+        {
+            this->forward_matrix->data[0][i] = (*it)[i];
+        }
 
-        // this->forward(cell, 0);
-
-        this->forward(*it, 0);
+        this->forward(0);
         it ++;
     }
     
@@ -113,38 +109,53 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data, con
 }
 
 /*
+* matrix multiplaication:
+* A * B = C
+* A: 1*input_dimension, B: input_dimension*output_dimension, C: 1*output_dimension
+*
 * @param double * patch_data: input data
 * @param int data_length: input data length
 * @param int which_layer: from 0 to (number of layers -1)
 */
-void FullyConnectedLayer::forward(const double * cell, const int which_layer)
+void FullyConnectedLayer::forward(const int which_layer)
 {
     if (which_layer >= this->number_of_layers) throw string("out of range");
     if (which_layer == this->number_of_layers - 1) return;
 
-    // this layer
-    matrix<double> weights_of_layer = this->getWeight(which_layer);
-    // next layer
-    matrix<double> answer(1, this->number_of_neurons_for_each_layer[which_layer+1]);
+    unsigned int input_dimension;
+    unsigned int output_dimension;
 
-    // convert double * to matrix
+    input_dimension = number_of_neurons_for_each_layer[which_layer];
+    output_dimension = number_of_neurons_for_each_layer[which_layer + 1];
 
-    try
+    struct matrix<double> A(1, input_dimension);
+    struct matrix<double> B(input_dimension, output_dimension);
+    struct matrix<double> C(1, output_dimension);
+
+    // read forward matrix
+    for (unsigned int i = 0; i < input_dimension; i++)
+        A.data[0][i] = this->forward_matrix->data[0][i];
+
+    // read weigths
+    B = this->getWeight(which_layer);
+
+    // matrix multiplication
+    matrixMultiplication(A, B, C);
+
+    // assign answer to forward matrix
+    free(this->forward_matrix);
+    this->forward_matrix = new matrix<double>(1, output_dimension);
+    ActivationFunction af;
+    for (unsigned int i = 0; i < output_dimension; i++)
     {
-        matrixMultiplication(cell, weights_of_layer, answer);
-    }
-    catch(const string e)
-    {
-        cerr << e << '\n';
-    }
+        this->forward_matrix->data[0][i] = 
+            C.data[0][i] + this->biases[which_layer].data[0][i];
 
-    for (int i = 0; i < answer.col; i++)
-    {
-        answer.data[0][i] += this->biases[which_layer+1].data[0][i];
+        this->forward_matrix->data[0][i] = 
+            af.sigmoid(this->forward_matrix->data[0][i]);
     }
-
-    // forward to next layer
-    this->forward(answer, which_layer+1);
+        
+    this->forward(which_layer+1);
 }
 
 /*

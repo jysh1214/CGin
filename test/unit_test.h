@@ -36,16 +36,6 @@ protected:
         five = new double[9]{1,0,1,0,1,0,1,0,1};
         six = new double[9]{1,0,1,1,0,1,1,0,1};
 
-        // input_data = 
-        // {
-        //     {one, 1},
-        //     {two, 2},
-        //     {three, 3},
-        //     {four, 4},
-        //     {five, 5},
-        //     {six, 6}
-        // };
-
         input_data.push_back(one);
         input_data.push_back(two);
         input_data.push_back(three);
@@ -77,7 +67,6 @@ protected:
     double * four;
     double * five;
     double * six;
-    // map<const double*, int, ptr_less<const double>> input_data;
     vector<double*> input_data;
     vector<int> annotation;
 };
@@ -126,9 +115,7 @@ TEST (Random_TEST, )
 // MAIN TEST
 TEST_F (Dice_Recognize_TEST, )
 {
-    // cout<<input_data.size()<<endl;
     FullyConnectedLayer f = FullyConnectedLayer(3, 9, 10, 6);
-    // f.GradientDescent(input_data, 10);
     f.GradientDescent(input_data, annotation, 10);
     ASSERT_TRUE(1);
 }
