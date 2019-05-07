@@ -87,7 +87,7 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
     unsigned int total_batch_size = 0;
     unsigned int epoch_count = 0;
 
-    double loss_sum = 0;
+    double loss_sum;
 
     unsigned int first_data_length = this->number_of_neurons_for_each_layer[0];
     unsigned int last_data_length = this->number_of_neurons_for_each_layer[this->number_of_layers];
@@ -95,30 +95,37 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
     for (; epoch_count < epoch; epoch_count++)
     {
 
+    loss_sum = 0;
+
     vector<double*>::const_iterator it = input_data.begin();
     vector<int>::const_iterator an_it = annotation.begin();
     for (; total_batch_size < input_data.size(); total_batch_size += mini_batch_size) // mini_batch_size = 1
     {
         // convert double * to struct matrix *
         this->forward_matrix = new matrix<double>(1, first_data_length);
-        for (unsigned int i = 0; i < first_data_length; i++) 
+        for (unsigned int i = 0; i < first_data_length; i++)
         {
             this->forward_matrix->data[0][i] = (*it)[i];
         }
         this->forward(0);
         it ++;
 
-        // count loss
-        for (unsigned int i = 0; i < last_data_length; i++)
+        // count loss for this batch size
+        for (int i = 0; i < signed(last_data_length); i++)
         {
             if (i == *an_it) // output should be 1
+            {
                 loss_sum += (1-this->forward_matrix->data[0][i])*(1-this->forward_matrix->data[0][i]);
+            }
             else // output should be 0
+            {
                 loss_sum += (this->forward_matrix->data[0][i])*(this->forward_matrix->data[0][i]);
+            }
         }
         an_it ++;
-
+        free(this->forward_matrix);
     } // batch data iterator
+    total_batch_size = 0;
 
     //帶入loss function 做梯地下降 調整權重和偏至
     loss_sum /= last_data_length;
