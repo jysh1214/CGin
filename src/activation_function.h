@@ -8,6 +8,7 @@ public:
     virtual ~ActivationFunction() {}
 
     double sigmoid(double z);
+    double sigmoid_derivative(double z);
 
 private:
 };

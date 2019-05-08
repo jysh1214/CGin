@@ -79,6 +79,13 @@ TEST (ActivationFunction_sigmoid_TEST, )
     ASSERT_TRUE(af.sigmoid(-3) < 1);
 }
 
+TEST (ActivationFunction_sigmoid_derivative_TEST, )
+{
+    ActivationFunction af;
+    ASSERT_NEAR(0, af.sigmoid_derivative(200), 0.001);
+    ASSERT_NEAR(-0.13439, af.sigmoid_derivative(1.235)* (-0.77), 0.001);
+}
+
 // class FullyConnectedLayer TEST
 TEST (FullyConnectedLayer_Test, )
 {

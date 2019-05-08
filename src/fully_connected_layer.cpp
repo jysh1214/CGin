@@ -90,14 +90,15 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
     double loss_sum;
 
     unsigned int first_data_length = this->number_of_neurons_for_each_layer[0];
-    unsigned int last_data_length = this->number_of_neurons_for_each_layer[this->number_of_layers];
+    unsigned int last_data_length = 
+        this->number_of_neurons_for_each_layer[this->number_of_layers];
 
     for (; epoch_count < epoch; epoch_count++)
     {
 
     loss_sum = 0;
 
-    vector<double*>::const_iterator it = input_data.begin();
+    vector<double*>::const_iterator in_it = input_data.begin();
     vector<int>::const_iterator an_it = annotation.begin();
     for (; total_batch_size < input_data.size(); total_batch_size += mini_batch_size) // mini_batch_size = 1
     {
@@ -105,10 +106,10 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
         this->forward_matrix = new matrix<double>(1, first_data_length);
         for (unsigned int i = 0; i < first_data_length; i++)
         {
-            this->forward_matrix->data[0][i] = (*it)[i];
+            this->forward_matrix->data[0][i] = (*in_it)[i];
         }
         this->forward(0);
-        it ++;
+        in_it ++;
 
         // count loss for this batch size
         for (int i = 0; i < signed(last_data_length); i++)
@@ -127,14 +128,12 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
     } // batch data iterator
     total_batch_size = 0;
 
-    //帶入loss function 做梯地下降 調整權重和偏至
     loss_sum /= last_data_length;
+    // visualization
+    cout<< "第" << epoch_count+1 << "次迭代： " << "loss: " << loss_sum << endl;
 
-    // vis
-    cout<< "第" <<epoch_count+1<< "次迭代： " << "loss: "<< loss_sum<<endl;
-
-
-    //全部迭代完成後 為一epoch
+    // adjust weight
+    
 
     } // epoch iterator
 }
