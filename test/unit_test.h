@@ -3,8 +3,6 @@
 
 #include <iostream>
 
-#include <map>
-
 #include "../src/activation_function.h"
 #include "../src/fully_connected_layer.h"
 #include "../src/matrix.h"
@@ -13,16 +11,36 @@
 
 using namespace std;
 
-#ifndef ptr_less_
-#define ptr_less_
-template<class T> struct ptr_less 
+// class ActivationFunction TEST
+TEST (ActivationFunction_sigmoid_TEST, )
 {
-    bool operator()(T* lhs, T* rhs) 
-    {
-        return *lhs < *rhs; 
-    }
-};
-#endif
+    ActivationFunction af;
+    ASSERT_EQ(1, af.sigmoid(200));
+    ASSERT_TRUE(af.sigmoid(-3) < 1);
+}
+
+TEST (ActivationFunction_sigmoid_derivative_TEST, )
+{
+    ActivationFunction af;
+    ASSERT_NEAR(0, af.sigmoid_derivative(200), 0.001);
+    ASSERT_NEAR(-0.13439, af.sigmoid_derivative(1.235)* (-0.77), 0.001);
+}
+
+// class FullyConnectedLayer TEST
+TEST (FullyConnectedLayer_Test, )
+{
+    FullyConnectedLayer f;
+    ASSERT_ANY_THROW(f = FullyConnectedLayer(4, 9, 5, 6));
+}
+
+// class Random TEST
+TEST (Random_TEST, )
+{
+    Random r;
+    double random_num = r.GaussianDistribution(0.0, 1.0);
+    ASSERT_TRUE(random_num < 1);
+    ASSERT_TRUE(random_num + 1 > 0);
+}
 
 class Dice_Recognize_TEST: public::testing::Test
 {
@@ -70,54 +88,6 @@ protected:
     vector<double*> input_data;
     vector<int> annotation;
 };
-
-// class ActivationFunction TEST
-TEST (ActivationFunction_sigmoid_TEST, )
-{
-    ActivationFunction af;
-    ASSERT_EQ(1, af.sigmoid(200));
-    ASSERT_TRUE(af.sigmoid(-3) < 1);
-}
-
-TEST (ActivationFunction_sigmoid_derivative_TEST, )
-{
-    ActivationFunction af;
-    ASSERT_NEAR(0, af.sigmoid_derivative(200), 0.001);
-    ASSERT_NEAR(-0.13439, af.sigmoid_derivative(1.235)* (-0.77), 0.001);
-}
-
-// class FullyConnectedLayer TEST
-TEST (FullyConnectedLayer_Test, )
-{
-    FullyConnectedLayer f = FullyConnectedLayer(3, 9, 5, 6);
-
-    struct matrix<double> m1 = f.getWeight(0);
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            ASSERT_EQ(1, m1.data[i][j]);
-        }
-    }
-
-    struct matrix<double> m2 = f.getWeight(1);
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            ASSERT_EQ(1, m2.data[i][j]);
-        }
-    }
-}
-
-// class Random TEST
-TEST (Random_TEST, )
-{
-    Random r;
-    double random_num = r.GaussianDistribution(0.0, 1.0);
-    ASSERT_TRUE(random_num < 1);
-    ASSERT_TRUE(random_num + 1 > 0);
-}
 
 // MAIN TEST
 TEST_F (Dice_Recognize_TEST, )

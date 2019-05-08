@@ -7,8 +7,8 @@ public:
     ActivationFunction() {}
     virtual ~ActivationFunction() {}
 
-    double sigmoid(double z);
-    double sigmoid_derivative(double z);
+    double sigmoid(const double z);
+    double sigmoid_derivative(const double z);
 
 private:
 };

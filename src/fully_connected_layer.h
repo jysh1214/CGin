@@ -10,36 +10,19 @@
 
 using namespace std;
 
-#ifndef ptr_less_
-#define ptr_less_
-template<class T> struct ptr_less 
-{
-    bool operator()(T* lhs, T* rhs) 
-    {
-        return *lhs < *rhs; 
-    }
-};
-#endif
-
 class FullyConnectedLayer: public NeuralNetwork
 {
 public:
+    FullyConnectedLayer() {}
     FullyConnectedLayer(const unsigned int number_of_layers, ...);
     virtual ~FullyConnectedLayer() {}
-    void setActivationFunction(const ActivationFunction activation_function);
-    void addHidenLayer(const FullyConnectedLayer fully_connected_layer);
 
     void GradientDescent(const vector<double*> &input_data, const vector<int> &annotation, 
         const unsigned int epoch, double learning_rate, unsigned int mini_batch_size=1);  
 
-    struct matrix<double> getWeight(const int which_weight);
-
-    // TEST
-    void showWeights(int i);
-    
 private:
-    double loss_function();
     void forward(const int which_layer);
+    struct matrix<double> getWeight(const int which_weight);
 
     vector <FullyConnectedLayer> hidenLayer;
     vector <NeuralNetwork> flow;
@@ -48,7 +31,8 @@ private:
     int * number_of_neurons_for_each_layer;
     ActivationFunction activation_function;
 
-    /* weight between two layers 
+    /* 
+    * weight between two layers 
     * weight[0] : layer_1 to layer_2
     * weight[1] : layer_2 to layer_3 ...
     * 
@@ -61,6 +45,7 @@ private:
 
     // to store forward matrix
     struct matrix<double> * forward_matrix;
+    vector <matrix<double>*> cells_value;
 };
 
 #endif

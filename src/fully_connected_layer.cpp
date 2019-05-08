@@ -5,7 +5,6 @@
 #include <map>
 
 #include "fully_connected_layer.h"
-
 #include "matrix.h"
 #include "matrix_multiplication.h"
 #include "random.h"
@@ -23,16 +22,16 @@ FullyConnectedLayer::FullyConnectedLayer(const unsigned int number_of_layers, ..
 {
     if (number_of_layers < 2) throw string("number of layers must be greater than 1\n");
     this->number_of_layers += number_of_layers;
-    this->number_of_neurons_for_each_layer = (int*) new int[number_of_layers];
+    this->number_of_neurons_for_each_layer = new int[number_of_layers];
 
     va_list number_of_neurons_for_each_layer;
     va_start(number_of_neurons_for_each_layer, number_of_layers);
         for (unsigned int i = 0; i < number_of_layers; i++)
         {
-            this->number_of_neurons_for_each_layer[i] = 
-                va_arg(number_of_neurons_for_each_layer, int);
+            this->number_of_neurons_for_each_layer[i] = va_arg(number_of_neurons_for_each_layer, int);
+            if (this->number_of_neurons_for_each_layer[i] <= 0)
+                throw string("number of layers is illegal\n");
         }
-            
     va_end(number_of_neurons_for_each_layer);
 
     // both the biases and the weight are randomly initialized
@@ -61,37 +60,16 @@ FullyConnectedLayer::FullyConnectedLayer(const unsigned int number_of_layers, ..
     }
 }
 
-void FullyConnectedLayer::setActivationFunction(const ActivationFunction activation_function)
-{
-
-}
-
-void FullyConnectedLayer::addHidenLayer(const FullyConnectedLayer fully_connected_layer)
-{
-    this->hidenLayer.push_back(fully_connected_layer);
-    this->number_of_layers ++;
-}
-
-/*
-* @param which_weight: choose which weigth you want
-* @return which weight you want 
-*/
-struct matrix<double> FullyConnectedLayer::getWeight(const int which_weight)
-{
-    return weights[which_weight];
-}
-
 void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data, 
     const vector<int> &annotation, const unsigned int epoch, double learning_rate, unsigned int mini_batch_size)
 {
-    unsigned int total_batch_size = 0;
     unsigned int epoch_count = 0;
-
-    double loss_sum;
+    unsigned int total_batch_size = 0;
 
     unsigned int first_data_length = this->number_of_neurons_for_each_layer[0];
-    unsigned int last_data_length = 
-        this->number_of_neurons_for_each_layer[this->number_of_layers];
+    unsigned int last_data_length = this->number_of_neurons_for_each_layer[this->number_of_layers];
+
+    double loss_sum;
 
     for (; epoch_count < epoch; epoch_count++)
     {
@@ -108,6 +86,7 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
         {
             this->forward_matrix->data[0][i] = (*in_it)[i];
         }
+        this->cells_value.push_back(this->forward_matrix);
         this->forward(0);
         in_it ++;
 
@@ -126,15 +105,14 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
         an_it ++;
         free(this->forward_matrix);
     } // batch data iterator
-    total_batch_size = 0;
-
     loss_sum /= last_data_length;
     // visualization
     cout<< "第" << epoch_count+1 << "次迭代： " << "loss: " << loss_sum << endl;
 
     // adjust weight
+    this->cells_value.clear();
     
-
+    total_batch_size = 0;
     } // epoch iterator
 }
 
@@ -184,34 +162,19 @@ void FullyConnectedLayer::forward(const int which_layer)
         this->forward_matrix->data[0][i] = 
             af.sigmoid(this->forward_matrix->data[0][i]);
     }
-        
+    this->cells_value.push_back(this->forward_matrix);
+
+    // for (unsigned int i = 0; i < output_dimension; i++)
+    //     cout<<this->cells_value[which_layer]->data[0][i]<<endl;
+
     this->forward(which_layer+1);
 }
 
 /*
-* @return the loss of current weights
+* @param which_weight: choose which weigth you want
+* @return which weight you want
 */
-double FullyConnectedLayer::loss_function()
+struct matrix<double> FullyConnectedLayer::getWeight(const int which_weight)
 {
-    return 1.11;
-}
-
-// TEST
-void FullyConnectedLayer::showWeights(int layer)
-{
-    // number of neurons of first layer
-    unsigned int r = this->number_of_neurons_for_each_layer[layer];
-    // number of neurons of second layer
-    unsigned int l = this->number_of_neurons_for_each_layer[layer+1];
-    
-    // cout<<r<<" "<<l<<endl; // terminal test
-    for (unsigned int i = 0; i < r; i++)
-    {
-        for (unsigned int j = 0; j < l; j++)
-        {
-            // cout<<this->weights[layer].data[i][j]<<", ";
-        }
-        // cout<<endl;
-    }
-    // cout<<endl;
+    return weights[which_weight];
 }
