@@ -110,6 +110,7 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
     cout<< "第" << epoch_count+1 << "次迭代： " << "loss: " << loss_sum << endl;
 
     // adjust weight
+    this->adjust_weights();
     this->cells_value.clear();
     
     total_batch_size = 0;
@@ -117,10 +118,6 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
 }
 
 /*
-* matrix multiplaication:
-* A * B = C
-* A: 1*input_dimension, B: input_dimension*output_dimension, C: 1*output_dimension
-*
 * @param double * patch_data: input data
 * @param int data_length: input data length
 * @param int which_layer: from 0 to (number of layers -1)
@@ -156,18 +153,32 @@ void FullyConnectedLayer::forward(const int which_layer)
     ActivationFunction af;
     for (unsigned int i = 0; i < output_dimension; i++)
     {
-        this->forward_matrix->data[0][i] = 
-            C.data[0][i] + this->biases[which_layer].data[0][i];
+        this->forward_matrix->data[0][i] = C.data[0][i];
+            //C.data[0][i] + this->biases[which_layer].data[0][i];
 
+        // this->forward_matrix->data[0][i] = 
+        //     af.sigmoid(this->forward_matrix->data[0][i]);
+    }
+
+    // save origin cells value
+    this->cells_value.push_back(this->forward_matrix);
+    
+    // activation function
+    for (unsigned int i = 0; i < output_dimension; i++)
+    {
         this->forward_matrix->data[0][i] = 
             af.sigmoid(this->forward_matrix->data[0][i]);
     }
-    this->cells_value.push_back(this->forward_matrix);
 
     // for (unsigned int i = 0; i < output_dimension; i++)
     //     cout<<this->cells_value[which_layer]->data[0][i]<<endl;
 
     this->forward(which_layer+1);
+}
+
+void FullyConnectedLayer::adjust_weights()
+{
+    
 }
 
 /*

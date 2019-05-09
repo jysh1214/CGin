@@ -22,6 +22,7 @@ public:
 
 private:
     void forward(const int which_layer);
+    void adjust_weights();
     struct matrix<double> getWeight(const int which_weight);
 
     vector <FullyConnectedLayer> hidenLayer;

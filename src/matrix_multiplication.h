@@ -7,8 +7,10 @@
 using namespace std;
 
 /*
-* A * B = C 
+* A * B = C
 *
+* @param A
+* @param B
 * @return C
 */
 template <class T>
