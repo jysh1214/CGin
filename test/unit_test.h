@@ -26,6 +26,15 @@ TEST (ActivationFunction_sigmoid_derivative_TEST, )
     ASSERT_NEAR(-0.13439, af.sigmoid_derivative(1.235)* (-0.77), 0.001);
 }
 
+TEST (ActivationFunction_derivative_TEST, )
+{
+    ActivationFunction * af;
+    double (ActivationFunction::*af_ptr)(double) = nullptr;
+    af_ptr = &ActivationFunction::sigmoid;
+    // cout<<(af->*af_ptr)(3.0)<<endl;
+    cout<<af->derivative(af_ptr, 3.0)<<endl;
+}
+
 // class FullyConnectedLayer TEST
 TEST (FullyConnectedLayer_Test, )
 {
