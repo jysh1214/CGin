@@ -28,11 +28,10 @@ TEST (ActivationFunction_sigmoid_derivative_TEST, )
 
 TEST (ActivationFunction_derivative_TEST, )
 {
-    ActivationFunction * af;
-    double (ActivationFunction::*af_ptr)(double) = nullptr;
-    af_ptr = &ActivationFunction::sigmoid;
+    // double (ActivationFunction::*af_ptr)(double) = nullptr;
+    // af_ptr = &ActivationFunction::sigmoid;
     // cout<<(af->*af_ptr)(3.0)<<endl;
-    cout<<af->derivative(af_ptr, 3.0)<<endl;
+    // cout<<af->derivative(af_ptr, 3.0)<<endl;
 }
 
 // class FullyConnectedLayer TEST

@@ -36,7 +36,7 @@ FullyConnectedLayer::FullyConnectedLayer(const unsigned int number_of_layers, ..
 
     // both the biases and the weight are randomly initialized
     this->biases = new matrix<double>[number_of_layers - 1];
-    this->weights = new matrix<double>[number_of_layers - 1];
+    this->weights = new matrix<double>(1, number_of_layers - 1);
     Random random;
     for (unsigned int i = 0; i < number_of_layers - 1; i++)
     {
@@ -67,7 +67,7 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
     unsigned int total_batch_size = 0;
 
     unsigned int first_data_length = this->number_of_neurons_for_each_layer[0];
-    unsigned int last_data_length = this->number_of_neurons_for_each_layer[this->number_of_layers];
+    unsigned int last_data_length = this->number_of_neurons_for_each_layer[this->number_of_layers-1];
 
     double loss_sum;
 
@@ -88,6 +88,11 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
         }
         this->cells_value.push_back(this->forward_matrix);
         this->forward(0);
+
+        // adjust weight
+        this->adjust_weights(*an_it);
+        this->cells_value.clear();
+
         in_it ++;
 
         // count loss for this batch size
@@ -108,10 +113,6 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
     loss_sum /= last_data_length;
     // visualization
     cout<< "第" << epoch_count+1 << "次迭代： " << "loss: " << loss_sum << endl;
-
-    // adjust weight
-    this->adjust_weights();
-    this->cells_value.clear();
     
     total_batch_size = 0;
     } // epoch iterator
@@ -155,9 +156,6 @@ void FullyConnectedLayer::forward(const int which_layer)
     {
         this->forward_matrix->data[0][i] = C.data[0][i];
             //C.data[0][i] + this->biases[which_layer].data[0][i];
-
-        // this->forward_matrix->data[0][i] = 
-        //     af.sigmoid(this->forward_matrix->data[0][i]);
     }
 
     // save origin cells value
@@ -170,15 +168,46 @@ void FullyConnectedLayer::forward(const int which_layer)
             af.sigmoid(this->forward_matrix->data[0][i]);
     }
 
-    // for (unsigned int i = 0; i < output_dimension; i++)
-    //     cout<<this->cells_value[which_layer]->data[0][i]<<endl;
-
     this->forward(which_layer+1);
 }
 
-void FullyConnectedLayer::adjust_weights()
+void FullyConnectedLayer::adjust_weights(const double target)
 {
-    
+    ActivationFunction af;
+    int output_length = number_of_neurons_for_each_layer[this->number_of_layers-1];
+    double  delta_output_sum;
+    // matrix<double> * delta_weights = nullptr;
+    matrix<double> * hidden_layer_results = nullptr;
+    for (int i = 0; i < output_length; i++)
+    {
+        for (int j = this->number_of_layers-1; j > 0; j--)
+        {
+            double cell_value = (this->cells_value[j])->data[0][i];
+            // cout<< cell_value<<endl;
+            double result = af.sigmoid(cell_value);
+            // cout<< result<<endl;
+            delta_output_sum = af.sigmoid_derivative(cell_value) * (target - result);
+            // cout<<delta_output_sum<<endl;
+
+            // free(hidden_layer_results);
+            hidden_layer_results = this->cells_value[j-1];
+
+            // delta_weights = delta_output_sum / hidden_layer_results;
+            unsigned int number_of_neurons = number_of_neurons_for_each_layer[j-1]; 
+            // cout<<number_of_neurons<<endl;
+            // delta_weights = new matrix<double>(1, number_of_neurons);
+            for (unsigned int k = 0; k < number_of_neurons; k++)
+            {
+                double delta_weight = delta_output_sum / hidden_layer_results->data[0][k];
+                // new weights = old weights + delta_weights
+                // (this->weights[j]).data[0][k] += delta_weight;
+            }
+
+            
+
+
+        } // layer iterator
+    } // output result iterator
 }
 
 /*

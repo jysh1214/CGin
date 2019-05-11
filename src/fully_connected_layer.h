@@ -18,11 +18,11 @@ public:
     virtual ~FullyConnectedLayer() {}
 
     void GradientDescent(const vector<double*> &input_data, const vector<int> &annotation, 
-        const unsigned int epoch, double learning_rate, unsigned int mini_batch_size=1);  
+        const unsigned int epoch, double learning_rate, unsigned int mini_batch_size=1);
 
 private:
     void forward(const int which_layer);
-    void adjust_weights();
+    void adjust_weights(const double target);
     struct matrix<double> getWeight(const int which_weight);
 
     vector <FullyConnectedLayer> hidenLayer;
@@ -30,7 +30,6 @@ private:
 
     int number_of_layers;
     int * number_of_neurons_for_each_layer;
-    ActivationFunction activation_function;
 
     /* 
     * weight between two layers 
@@ -47,6 +46,9 @@ private:
     // to store forward matrix
     struct matrix<double> * forward_matrix;
     vector <matrix<double>*> cells_value;
+
+    // activation function pointer
+    double (ActivationFunction::*af_ptr)(double);
 };
 
 #endif
