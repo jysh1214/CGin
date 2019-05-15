@@ -36,7 +36,7 @@ FullyConnectedLayer::FullyConnectedLayer(const unsigned int number_of_layers, ..
 
     // both the biases and the weight are randomly initialized
     this->biases = new matrix<double>[number_of_layers - 1];
-    this->weights = new matrix<double>(1, number_of_layers - 1);
+    // this->weights = new matrix<double>(1, number_of_layers - 1);
     Random random;
     for (unsigned int i = 0; i < number_of_layers - 1; i++)
     {
@@ -50,13 +50,13 @@ FullyConnectedLayer::FullyConnectedLayer(const unsigned int number_of_layers, ..
             biases_matrix.data[0][i] = random.GaussianDistribution(0.0, 1.0);
         this->biases[i] = biases_matrix;
 
-        matrix<double> weights_matrix(r, l);
+        matrix<double> * weights_matrix = new matrix<double>(r, l);
         for (unsigned int j = 0; j < r; j++)
         {
             for (unsigned int k = 0; k < l; k++)
-                weights_matrix.data[j][k] = random.GaussianDistribution(0.0, 1.0);
+                weights_matrix->data[j][k] = random.GaussianDistribution(0.0, 1.0);
         }
-        this->weights[i] = weights_matrix;
+        this->weights.push_back(weights_matrix);
     }
 }
 
@@ -82,6 +82,7 @@ void FullyConnectedLayer::GradientDescent(const vector<double*> &input_data,
     {
         // convert double * to struct matrix *
         this->forward_matrix = new matrix<double>(1, first_data_length);
+
         for (unsigned int i = 0; i < first_data_length; i++)
         {
             this->forward_matrix->data[0][i] = (*in_it)[i];
@@ -134,13 +135,13 @@ void FullyConnectedLayer::forward(const int which_layer)
     input_dimension = number_of_neurons_for_each_layer[which_layer];
     output_dimension = number_of_neurons_for_each_layer[which_layer + 1];
 
-    struct matrix<double> A(1, input_dimension);
-    struct matrix<double> B(input_dimension, output_dimension);
-    struct matrix<double> C(1, output_dimension);
+    struct matrix<double> * A = new matrix<double>(1, input_dimension);
+    struct matrix<double> * B = new matrix<double>(input_dimension, output_dimension);
+    struct matrix<double> * C = new matrix<double>(1, output_dimension);
 
     // read forward matrix
     for (unsigned int i = 0; i < input_dimension; i++)
-        A.data[0][i] = this->forward_matrix->data[0][i];
+        A->data[0][i] = this->forward_matrix->data[0][i];
 
     // read weigths
     B = this->getWeight(which_layer);
@@ -154,7 +155,7 @@ void FullyConnectedLayer::forward(const int which_layer)
     ActivationFunction af;
     for (unsigned int i = 0; i < output_dimension; i++)
     {
-        this->forward_matrix->data[0][i] = C.data[0][i];
+        this->forward_matrix->data[0][i] = C->data[0][i];
             //C.data[0][i] + this->biases[which_layer].data[0][i];
     }
 
@@ -176,37 +177,37 @@ void FullyConnectedLayer::adjust_weights(const double target)
     ActivationFunction af;
     int output_length = number_of_neurons_for_each_layer[this->number_of_layers-1];
     double  delta_output_sum;
-    // matrix<double> * delta_weights = nullptr;
+    double cell_value;
+    double result;
+    double delta_weight; int j = this->number_of_layers-1;
+
     matrix<double> * hidden_layer_results = nullptr;
     for (int i = 0; i < output_length; i++)
     {
-        for (int j = this->number_of_layers-1; j > 0; j--)
-        {
-            double cell_value = (this->cells_value[j])->data[0][i];
-            // cout<< cell_value<<endl;
-            double result = af.sigmoid(cell_value);
-            // cout<< result<<endl;
+        // for (int j = this->number_of_layers-1; j > 0; j--)
+        // {
+            cell_value = (this->cells_value[j])->data[0][i];
+            result = af.sigmoid(cell_value);
             delta_output_sum = af.sigmoid_derivative(cell_value) * (target - result);
-            // cout<<delta_output_sum<<endl;
+            // cout<< delta_output_sum <<endl;
 
-            // free(hidden_layer_results);
             hidden_layer_results = this->cells_value[j-1];
 
             // delta_weights = delta_output_sum / hidden_layer_results;
-            unsigned int number_of_neurons = number_of_neurons_for_each_layer[j-1]; 
-            // cout<<number_of_neurons<<endl;
-            // delta_weights = new matrix<double>(1, number_of_neurons);
+            // number_of_neurons = number of neurons of last layer
+            unsigned int number_of_neurons = number_of_neurons_for_each_layer[j-1];
             for (unsigned int k = 0; k < number_of_neurons; k++)
             {
-                double delta_weight = delta_output_sum / hidden_layer_results->data[0][k];
+                (hidden_layer_results->data[0][k] == 0)?
+                delta_weight = 0 :
+                delta_weight = delta_output_sum / hidden_layer_results->data[0][k];
+                // cout<<hidden_layer_results->data[0][k]<<endl;
+                // cout<<delta_weight * 10<<endl;
+
                 // new weights = old weights + delta_weights
-                // (this->weights[j]).data[0][k] += delta_weight;
+                this->weights[j-1]->data[k][j] += delta_weight;
             }
-
-            
-
-
-        } // layer iterator
+        // } // layer iterator
     } // output result iterator
 }
 
@@ -214,7 +215,7 @@ void FullyConnectedLayer::adjust_weights(const double target)
 * @param which_weight: choose which weigth you want
 * @return which weight you want
 */
-struct matrix<double> FullyConnectedLayer::getWeight(const int which_weight)
+struct matrix<double> * FullyConnectedLayer::getWeight(const int which_weight)
 {
     return weights[which_weight];
 }

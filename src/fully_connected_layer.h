@@ -23,7 +23,7 @@ public:
 private:
     void forward(const int which_layer);
     void adjust_weights(const double target);
-    struct matrix<double> getWeight(const int which_weight);
+    struct matrix<double> * getWeight(const int which_weight);
 
     vector <FullyConnectedLayer> hidenLayer;
     vector <NeuralNetwork> flow;
@@ -41,7 +41,9 @@ private:
     * layer: 0| |1| |2| |3 ...
     */
     struct matrix<double> * biases;
-    struct matrix<double> * weights;
+    // struct matrix<double> * weights;
+
+    vector <matrix<double>*> weights;
 
     // to store forward matrix
     struct matrix<double> * forward_matrix;
